@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import crypto from "crypto";
 import { connectDB } from "@/lib/db/connect";
 import { User } from "@/models/User";
 import { DoctorProfile } from "@/models/DoctorProfile";
@@ -13,13 +14,39 @@ export async function POST(req: NextRequest) {
     if (auth.error) return auth.error;
 
     await connectDB();
-    const { doctorId, date, timeSlot, symptoms, paymentMethod } = await req.json();
+    const {
+      doctorId,
+      date,
+      timeSlot,
+      symptoms,
+      paymentMethod,
+      razorpayPaymentId,
+      razorpayOrderId,
+      razorpaySignature,
+    } = await req.json();
 
     if (!doctorId || !date || !timeSlot || !symptoms?.trim() || !paymentMethod) {
       return error("All booking fields are required");
     }
     if (!["cash", "upi"].includes(paymentMethod)) {
       return error("Invalid payment method");
+    }
+
+    // Verify Razorpay payment for UPI
+    if (paymentMethod === "upi") {
+      if (!razorpayPaymentId || !razorpayOrderId || !razorpaySignature) {
+        return error("Payment verification details missing");
+      }
+
+      const sign = razorpayOrderId + "|" + razorpayPaymentId;
+      const expectedSign = crypto
+        .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET!)
+        .update(sign)
+        .digest("hex");
+
+      if (razorpaySignature !== expectedSign) {
+        return error("Invalid payment signature", 400);
+      }
     }
 
     const patient = await User.findById(auth.payload.userId);
@@ -58,7 +85,7 @@ export async function POST(req: NextRequest) {
       symptoms: symptoms.trim(),
       consultationFee: profile.consultationFee,
       paymentMethod,
-      paymentStatus: "pending",
+      paymentStatus: paymentMethod === "upi" ? "paid" : "pending",
       emailSent: false,
     });
 

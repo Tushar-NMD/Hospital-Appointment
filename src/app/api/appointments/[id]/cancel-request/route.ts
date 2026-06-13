@@ -4,7 +4,6 @@ import { Appointment, formatAppointment } from "@/models/Appointment";
 import { requireAuth } from "@/lib/api/auth-guard";
 import { success, error } from "@/lib/api/response";
 import {
-  canRequestCancellation,
   isBeforeAppointmentTime,
 } from "@/lib/appointment-queue";
 

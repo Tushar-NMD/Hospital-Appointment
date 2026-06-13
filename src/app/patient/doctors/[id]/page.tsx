@@ -80,6 +80,14 @@ export default function DoctorDetailPage() {
       setError("Please select a payment method");
       return;
     }
+
+    // If UPI payment, initiate Razorpay
+    if (paymentMethod === "upi") {
+      await handleRazorpayPayment();
+      return;
+    }
+
+    // For cash payment, book directly
     setBooking(true);
     setError("");
     const result = await bookAppointment({
@@ -95,6 +103,92 @@ export default function DoctorDetailPage() {
       setError(result.message);
     }
     setBooking(false);
+  };
+
+  const handleRazorpayPayment = async () => {
+    setBooking(true);
+    setError("");
+
+    try {
+      // Load Razorpay script
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.async = true;
+      document.body.appendChild(script);
+
+      await new Promise((resolve) => {
+        script.onload = resolve;
+      });
+
+      // Create Razorpay order
+      const orderRes = await fetch("/api/payment/create-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          amount: profile!.consultationFee,
+          doctorId,
+          date: selectedDate,
+          timeSlot: selectedSlot,
+        }),
+      });
+
+      const orderData = await orderRes.json();
+      if (!orderData.success || !orderData.data) {
+        setError(orderData.message || "Failed to create payment order");
+        setBooking(false);
+        return;
+      }
+
+      // Initialize Razorpay
+      const options = {
+        key: orderData.data.key,
+        amount: orderData.data.order.amount,
+        currency: "INR",
+        name: "MedCare Hospital",
+        description: `Consultation with ${doctor?.name}`,
+        order_id: orderData.data.order.id,
+        handler: async (response: any) => {
+          // Verify payment and book appointment
+          const result = await bookAppointment({
+            doctorId,
+            date: selectedDate,
+            timeSlot: selectedSlot,
+            symptoms,
+            paymentMethod: "upi",
+            razorpayPaymentId: response.razorpay_payment_id,
+            razorpayOrderId: response.razorpay_order_id,
+            razorpaySignature: response.razorpay_signature,
+          });
+
+          if (result.success) {
+            setSuccess(true);
+          } else {
+            setError(result.message);
+          }
+          setBooking(false);
+        },
+        prefill: {
+          name: doctor?.name || "",
+          email: doctor?.email || "",
+        },
+        theme: {
+          color: "#0EA5E9",
+        },
+        modal: {
+          ondismiss: () => {
+            setError("Payment cancelled");
+            setBooking(false);
+          },
+        },
+      };
+
+      const razorpay = new (window as any).Razorpay(options);
+      razorpay.open();
+    } catch (err) {
+      console.error("Razorpay error:", err);
+      setError("Payment initialization failed");
+      setBooking(false);
+    }
   };
 
   if (pageLoading) {
@@ -302,8 +396,8 @@ export default function DoctorDetailPage() {
 
                   {paymentMethod === "upi" && (
                     <div className="p-3 rounded-xl bg-accent-50 border border-accent-100 text-sm text-accent-800">
-                      Pay {formatCurrency(profile.consultationFee)} via UPI at the clinic or when
-                      requested. Your doctor will mark payment as received.
+                      Pay {formatCurrency(profile.consultationFee)} securely via Razorpay.
+                      Payment will be processed when you click Confirm Booking.
                     </div>
                   )}
 

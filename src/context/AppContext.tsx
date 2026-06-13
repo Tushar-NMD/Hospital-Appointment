@@ -33,7 +33,7 @@ interface AppContextType {
   user: User | null;
   doctorProfile: DoctorProfile | null;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<{ success: boolean; message: string }>;
+  login: (email: string, password: string, role: "patient" | "doctor") => Promise<{ success: boolean; message: string }>;
   register: (
     data: Omit<User, "id" | "createdAt"> & { password: string }
   ) => Promise<{ success: boolean; message: string }>;
@@ -54,6 +54,9 @@ interface AppContextType {
     timeSlot: string;
     symptoms: string;
     paymentMethod: "cash" | "upi";
+    razorpayPaymentId?: string;
+    razorpayOrderId?: string;
+    razorpaySignature?: string;
   }) => Promise<{ success: boolean; message: string; appointment?: Appointment }>;
   fetchPatientAppointments: () => Promise<Appointment[]>;
   fetchDoctorAppointments: (
@@ -106,8 +109,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     refreshUser().finally(() => setIsLoading(false));
   }, [refreshUser]);
 
-  const login = useCallback(async (email: string, password: string) => {
-    const res = await api.auth.login(email, password);
+  const login = useCallback(async (email: string, password: string, role: "patient" | "doctor") => {
+    const res = await api.auth.login(email, password, role);
     if (res.success && res.data) {
       setToken(res.data.token);
       setUser(res.data.user);
@@ -189,6 +192,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       timeSlot: string;
       symptoms: string;
       paymentMethod: "cash" | "upi";
+      razorpayPaymentId?: string;
+      razorpayOrderId?: string;
+      razorpaySignature?: string;
     }) => {
       const res = await api.appointments.book(data);
       if (res.success && res.data) {

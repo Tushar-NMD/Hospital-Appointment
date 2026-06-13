@@ -20,8 +20,8 @@ export async function POST(req: NextRequest) {
     if (name.length < 5 || name.length > 20) {
       return error("Name must be 5-20 characters");
     }
-    if (!/^[a-zA-Z@.]+$/.test(email) || email.length > 20) {
-      return error("Email can only contain letters (max 20 characters)");
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return error("Invalid email format");
     }
     if (!phone.startsWith("+91") || phone.replace("+91", "").length !== 10) {
       return error("Phone must be +91 followed by 10 digits");

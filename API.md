@@ -123,3 +123,66 @@ npm run seed
 ```
 
 Creates doctors + patient with passwords `doctor123` / `patient123`.
+
+## Payment
+
+### POST `/payment/create-order`
+**Auth Required:** Patient
+
+Creates a Razorpay order for appointment booking.
+
+**Request:**
+```json
+{
+  "amount": 500,
+  "doctorId": "65f1a2b3c4d5e6f7a8b9c0d1",
+  "date": "2026-06-15",
+  "timeSlot": "10:00 AM - 10:30 AM"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "order": {
+      "id": "order_abc123",
+      "amount": 50000,
+      "currency": "INR",
+      "receipt": "apt_1234567890"
+    },
+    "key": "rzp_test_xxxxx"
+  }
+}
+```
+
+---
+
+## Razorpay Integration Flow
+
+1. **Patient selects UPI payment method**
+2. **Frontend calls** `/api/payment/create-order` to create Razorpay order
+3. **Razorpay checkout opens** for payment
+4. **On successful payment**, Razorpay returns:
+   - `razorpay_payment_id`
+   - `razorpay_order_id`
+   - `razorpay_signature`
+5. **Frontend sends these to** `/api/appointments` along with booking details
+6. **Backend verifies payment signature** using HMAC SHA256
+7. **If valid**, appointment is created with `paymentStatus: "paid"`
+
+**Payment Verification:**
+```javascript
+const sign = order_id + "|" + payment_id;
+const expectedSign = crypto
+  .createHmac("sha256", RAZORPAY_KEY_SECRET)
+  .update(sign)
+  .digest("hex");
+  
+if (razorpay_signature === expectedSign) {
+  // Payment verified
+}
+```
+
+---

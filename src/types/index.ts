@@ -98,3 +98,10 @@ export interface FAQItem {
   question: string;
   answer: string;
 }
+
+// Razorpay types for window object
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}

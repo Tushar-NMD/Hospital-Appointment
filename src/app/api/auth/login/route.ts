@@ -9,13 +9,13 @@ import { setAuthCookie } from "@/lib/api/cookies";
 export async function POST(req: NextRequest) {
   try {
     await connectDB();
-    const { email, password } = await req.json();
+    const { email, password, role } = await req.json();
 
     if (!email || !password) {
       return error("Email and password are required");
     }
-    if (!/^[a-zA-Z@.]+$/.test(email) || email.length > 20) {
-      return error("Invalid email format");
+    if (!role || !["patient", "doctor"].includes(role)) {
+      return error("Invalid role selected");
     }
     if (password.length !== 5) {
       return error("Invalid password format");
@@ -24,6 +24,11 @@ export async function POST(req: NextRequest) {
     const user = await User.findOne({ email: email.toLowerCase() }).select("+password");
     if (!user || !(await verifyPassword(password, user.password))) {
       return error("Invalid email or password", 401);
+    }
+
+    // Verify role matches
+    if (user.role !== role) {
+      return error(`This account is registered as ${user.role}. Please use the correct login.`, 403);
     }
 
     const token = signToken({

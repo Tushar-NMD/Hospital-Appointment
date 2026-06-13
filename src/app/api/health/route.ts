@@ -4,7 +4,7 @@ import { connectDB } from "@/lib/db/connect";
 export async function GET() {
   try {
     const checks = {
-      status: "ok",
+      status: "ok" as "ok" | "error",
       timestamp: new Date().toISOString(),
       environment: process.env.NODE_ENV,
       checks: {
@@ -16,21 +16,16 @@ export async function GET() {
           process.env.CLOUDINARY_API_SECRET
         ),
         resend: !!process.env.RESEND_API_KEY,
+        mongodbConnection: false,
       },
     };
 
     // Test MongoDB connection
     try {
       await connectDB();
-      checks.checks = {
-        ...checks.checks,
-        mongodbConnection: true,
-      };
-    } catch (err) {
-      checks.checks = {
-        ...checks.checks,
-        mongodbConnection: false,
-      };
+      checks.checks.mongodbConnection = true;
+    } catch {
+      checks.checks.mongodbConnection = false;
       checks.status = "error";
     }
 

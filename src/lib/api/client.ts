@@ -50,10 +50,10 @@ export const api = {
         body: JSON.stringify(body),
       }),
 
-    login: (email: string, password: string) =>
+    login: (email: string, password: string, role: "patient" | "doctor") =>
       request<{ user: User; token: string }>("/auth/login", {
         method: "POST",
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, role }),
       }),
 
     me: () =>

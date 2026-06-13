@@ -88,24 +88,58 @@ export default function Navbar() {
               <>
                 {user.role === "patient" && (
                   <>
+                    <Link href="/patient/doctors">
+                      <Button 
+                        variant={pathname.startsWith("/patient/doctors") ? "default" : "ghost"} 
+                        size="sm" 
+                        className={!pathname.startsWith("/patient/doctors") && (scrolled || !isHome) ? "" : "text-white hover:bg-white/10"}
+                      >
+                        Find Doctors
+                      </Button>
+                    </Link>
                     <Link href="/patient/appointments">
-                      <Button variant="ghost" size="sm" className={scrolled || !isHome ? "" : "text-white hover:bg-white/10"}>
+                      <Button 
+                        variant={pathname.startsWith("/patient/appointments") ? "default" : "ghost"} 
+                        size="sm" 
+                        className={!pathname.startsWith("/patient/appointments") && (scrolled || !isHome) ? "" : "text-white hover:bg-white/10"}
+                      >
                         My Appointments
                       </Button>
                     </Link>
                     <Link href="/patient/profile">
-                      <Button variant="ghost" size="sm" className={scrolled || !isHome ? "" : "text-white hover:bg-white/10"}>
-                        My Profile
+                      <Button 
+                        variant={pathname === "/patient/profile" ? "default" : "ghost"} 
+                        size="sm" 
+                        className={pathname !== "/patient/profile" && (scrolled || !isHome) ? "" : "text-white hover:bg-white/10"}
+                      >
+                        Profile
                       </Button>
                     </Link>
                   </>
                 )}
-                <Link href={dashboardLink}>
-                  <Button variant="outline" size="sm" className={scrolled || !isHome ? "" : "border-white text-white hover:bg-white/10"}>
-                    <LayoutDashboard className="w-4 h-4" />
-                    Dashboard
-                  </Button>
-                </Link>
+                {user.role === "doctor" && (
+                  <>
+                    <Link href="/doctor/dashboard">
+                      <Button 
+                        variant={pathname === "/doctor/dashboard" ? "default" : "ghost"} 
+                        size="sm" 
+                        className={pathname !== "/doctor/dashboard" && (scrolled || !isHome) ? "" : "text-white hover:bg-white/10"}
+                      >
+                        <LayoutDashboard className="w-4 h-4" />
+                        Dashboard
+                      </Button>
+                    </Link>
+                    <Link href="/doctor/profile">
+                      <Button 
+                        variant={pathname === "/doctor/profile" ? "default" : "ghost"} 
+                        size="sm" 
+                        className={pathname !== "/doctor/profile" && (scrolled || !isHome) ? "" : "text-white hover:bg-white/10"}
+                      >
+                        Profile
+                      </Button>
+                    </Link>
+                  </>
+                )}
                 <Link
                   href={profileLink}
                   className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gray-100 hover:bg-gray-200 transition-colors"

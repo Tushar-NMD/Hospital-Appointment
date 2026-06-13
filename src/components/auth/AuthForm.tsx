@@ -31,6 +31,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
 
   const isDoctor = role === "doctor";
 
@@ -40,8 +41,8 @@ export default function AuthForm({ mode }: AuthFormProps) {
     setLoading(true);
 
     if (mode === "login") {
-      if (!/^[a-zA-Z@.]+$/.test(form.email) || form.email.length > 20) {
-        setError("Email can only contain letters (max 20 characters)");
+      if (!form.email || !form.password) {
+        setError("Please fill in all fields");
         setLoading(false);
         return;
       }
@@ -50,7 +51,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
         setLoading(false);
         return;
       }
-      const result = await login(form.email, form.password);
+      const result = await login(form.email, form.password, role);
       if (result.success) {
         router.push(isDoctor ? "/doctor/dashboard" : "/patient/doctors");
       } else {
@@ -64,11 +65,6 @@ export default function AuthForm({ mode }: AuthFormProps) {
       }
       if (form.name.length < 5 || form.name.length > 20) {
         setError("Name must be 5-20 characters");
-        setLoading(false);
-        return;
-      }
-      if (!/^[a-zA-Z@.]+$/.test(form.email) || form.email.length > 20) {
-        setError("Email can only contain letters (max 20 characters)");
         setLoading(false);
         return;
       }
@@ -97,7 +93,12 @@ export default function AuthForm({ mode }: AuthFormProps) {
         role,
       });
       if (result.success) {
-        router.push(isDoctor ? "/doctor/profile" : "/patient/profile");
+        setError("");
+        setSuccess(true);
+        setForm({ name: "", email: "", password: "", phone: "", photo: "" });
+        setTimeout(() => {
+          router.push(`/auth/login?role=${role}`);
+        }, 2000);
       } else {
         setError(result.message);
       }
@@ -177,15 +178,11 @@ export default function AuthForm({ mode }: AuthFormProps) {
             <Input
               id="email"
               label="Email Address"
-              type="text"
+              type="email"
               placeholder="you@example.com"
               value={form.email}
-              onChange={(e) => {
-                const val = e.target.value.replace(/[^a-zA-Z@.]/g, "").slice(0, 20);
-                setForm({ ...form, email: val });
-              }}
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
               required
-              maxLength={20}
             />
             {mode === "register" && (
               <Input
@@ -223,6 +220,12 @@ export default function AuthForm({ mode }: AuthFormProps) {
             {error && (
               <div className="p-3 rounded-xl bg-red-50 text-red-600 text-sm border border-red-100">
                 {error}
+              </div>
+            )}
+
+            {success && (
+              <div className="p-3 rounded-xl bg-green-50 text-green-600 text-sm border border-green-100">
+                ✓ Registration successful! Redirecting to login...
               </div>
             )}
 
