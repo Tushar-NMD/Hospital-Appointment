@@ -70,6 +70,7 @@ export async function POST(req: NextRequest) {
     return setAuthCookie(res, token);
   } catch (err) {
     console.error("Register error:", err);
-    return error("Registration failed", 500);
+    const message = err instanceof Error ? err.message : "Registration failed";
+    return error(message, 500);
   }
 }
