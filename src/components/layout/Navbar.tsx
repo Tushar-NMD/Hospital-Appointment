@@ -90,7 +90,7 @@ export default function Navbar() {
                   <>
                     <Link href="/patient/doctors">
                       <Button 
-                        variant={pathname.startsWith("/patient/doctors") ? "default" : "ghost"} 
+                        variant={pathname.startsWith("/patient/doctors") ? "primary" : "ghost"} 
                         size="sm" 
                         className={!pathname.startsWith("/patient/doctors") && (scrolled || !isHome) ? "" : "text-white hover:bg-white/10"}
                       >
@@ -99,7 +99,7 @@ export default function Navbar() {
                     </Link>
                     <Link href="/patient/appointments">
                       <Button 
-                        variant={pathname.startsWith("/patient/appointments") ? "default" : "ghost"} 
+                        variant={pathname.startsWith("/patient/appointments") ? "primary" : "ghost"} 
                         size="sm" 
                         className={!pathname.startsWith("/patient/appointments") && (scrolled || !isHome) ? "" : "text-white hover:bg-white/10"}
                       >
@@ -108,7 +108,7 @@ export default function Navbar() {
                     </Link>
                     <Link href="/patient/profile">
                       <Button 
-                        variant={pathname === "/patient/profile" ? "default" : "ghost"} 
+                        variant={pathname === "/patient/profile" ? "primary" : "ghost"} 
                         size="sm" 
                         className={pathname !== "/patient/profile" && (scrolled || !isHome) ? "" : "text-white hover:bg-white/10"}
                       >
@@ -121,7 +121,7 @@ export default function Navbar() {
                   <>
                     <Link href="/doctor/dashboard">
                       <Button 
-                        variant={pathname === "/doctor/dashboard" ? "default" : "ghost"} 
+                        variant={pathname === "/doctor/dashboard" ? "primary" : "ghost"} 
                         size="sm" 
                         className={pathname !== "/doctor/dashboard" && (scrolled || !isHome) ? "" : "text-white hover:bg-white/10"}
                       >
@@ -131,7 +131,7 @@ export default function Navbar() {
                     </Link>
                     <Link href="/doctor/profile">
                       <Button 
-                        variant={pathname === "/doctor/profile" ? "default" : "ghost"} 
+                        variant={pathname === "/doctor/profile" ? "primary" : "ghost"} 
                         size="sm" 
                         className={pathname !== "/doctor/profile" && (scrolled || !isHome) ? "" : "text-white hover:bg-white/10"}
                       >
