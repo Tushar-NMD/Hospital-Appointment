@@ -23,7 +23,7 @@ import Avatar from "@/components/ui/Avatar";
 import Textarea from "@/components/ui/Textarea";
 import PaymentMethodSelect from "@/components/patient/PaymentMethodSelect";
 import { useApp } from "@/context/AppContext";
-import { DoctorProfile, PaymentMethod, User } from "@/types";
+import { DoctorProfile, PaymentMethod, User, RazorpayResponse } from "@/types";
 import { cn, formatCurrency } from "@/lib/utils";
 
 export default function DoctorDetailPage() {
@@ -147,7 +147,7 @@ export default function DoctorDetailPage() {
         name: "MedCare Hospital",
         description: `Consultation with ${doctor?.name}`,
         order_id: orderData.data.order.id,
-        handler: async (response: any) => {
+        handler: async (response: RazorpayResponse) => {
           // Verify payment and book appointment
           const result = await bookAppointment({
             doctorId,
@@ -182,7 +182,7 @@ export default function DoctorDetailPage() {
         },
       };
 
-      const razorpay = new (window as any).Razorpay(options);
+      const razorpay = new window.Razorpay(options);
       razorpay.open();
     } catch (err) {
       console.error("Razorpay error:", err);
