@@ -26,6 +26,7 @@ export default function FAQ() {
           <p className="text-gray-600 text-lg">
             Find answers to common questions about MedCare.
           </p>
+          <h2>CI/CD Test - 25 June</h2>
         </motion.div>
 
         <div className="space-y-3">
